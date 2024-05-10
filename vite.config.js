@@ -15,7 +15,7 @@ export default defineConfig({
     Components({
       resolvers: [VantResolver()],
     }),
-     VueDevTools(),
+     // VueDevTools(),
   ],
   resolve: {
     alias: {

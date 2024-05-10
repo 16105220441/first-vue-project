@@ -1,30 +1,85 @@
 <script setup>
+import {defineProps} from 'vue'
+import router from "@/router/index.js";
 
+
+const navigateToProDetail = (id)=>{
+  console.log('id',id)
+  router.push({name:'ProDetail',params:{
+    id:id
+    }})
+  console.log(`router`,router)
+
+}
+
+defineProps(['dataItem'])
 </script>
 
 <template>
-  <van-row justify="end" gutter="20">
-    <van-col span="8">
-      <van-image src="src/assets/product.jpg"></van-image>
+  <van-row justify="end" class="main" gutter="20" @click=" navigateToProDetail(dataItem.goods_id)">
+    <van-col span="8" >
+      <van-image :src="dataItem.goods_image"></van-image>
     </van-col>
-    <van-col span="16" >
+    <van-col span="16">
       <p>
         <van-text-ellipsis
             rows="2"
-            content="三星手机 SAMSUNG Galaxy S23 8GB+256GB 超视觉夜拍系统 超清夜景 悠雾紫 5G手机 游戏拍照旗舰机s23"
-            style="text-indent: 0"
+            :content="dataItem.goods_name"
+
         />
       </p>
-      <div style="text-align: left;margin-bottom:10px">已售351413件</div>
-<van-row>
-  <van-col span="8" class="newValue" style="text-align: left;color: #c21401">￥0.01</van-col>
-  <van-col span="8" class="oldValue" style="text-align: left;text-decoration: line-through">￥0.01</van-col>
-</van-row>
+      <div class="sold">已售{{ dataItem.goods_sales }}件</div>
+      <van-row>
+        <van-col span="8" class="value new-value">￥{{ dataItem.line_price_max }}
+        </van-col>
+        <van-col span="8" class="value old-value">
+          ￥{{ dataItem.line_price_min }}
+        </van-col>
+      </van-row>
 
     </van-col>
   </van-row>
 </template>
 
-<style scoped>
+<style lang="less" scoped>
+.main {
+  height: 148px;
+  align-items: center;
+}
 
+.van-row {
+  .van-col {
+    padding: 10px;
+
+    .van-text-ellipsis {
+      text-align: left;
+      text-indent: 0;
+      color: #000000;
+    }
+
+    .value {
+      font-size:16px;
+      line-height: 16px;
+      padding: 0;
+      display: inline-block;
+      text-align: left;
+      vertical-align: bottom;
+    }
+
+    .new-value {
+      color: #c21401;
+
+    }
+
+    .old-value {
+      text-decoration: line-through;
+      font-size: 10px;
+    }
+  }
+
+  .sold {
+    padding: 10px 0;
+    text-align: left;
+  }
+}
 </style>
