@@ -1,14 +1,54 @@
 <script setup>
-import {reactive, ref} from 'vue'
+import {reactive, ref,computed,watchEffect,toRefs} from 'vue'
+import {userStore} from "@/store/userStore.js";
+import router from "@/router/index.js";
+import {cartStore} from "@/store/cartStore.js";
+import {getCustomerBasicInfo} from "@/api/user.js";
 
-const isLogin = ref(false)
-const detail = reactive({
-  mobile: '1587946'
+let isLogin = ref(false)
+let detail = reactive({
+  mobile: ''
 })
 
 function Login() {
-  console.log("点击跳转")
+  router.push({name:'login'})
 }
+
+let showDialog = ref(false)
+
+const signOut = ()=>{
+  for(let key in userStore().userInfo){
+    console.log('key',key,':',userStore().userInfo[key])
+    userStore().userInfo[key] = ''
+  }
+
+  for(let key in cartStore().cartInfo){
+    console.log(typeof(cartStore().cartInfo[key]))
+
+      if(typeof(cartStore().cartInfo[key]) === "object"){
+        cartStore().cartInfo[key] = {}
+      }else if(typeof(cartStore().cartInfo[key]) === "number"){
+        cartStore().cartInfo[key] = 0
+      }
+
+  }
+   console.log(cartStore().cartInfo)
+}
+
+//计算是否登录
+watchEffect(()=>{
+  isLogin.value = !!userStore().userInfo.token
+})
+//获取用户信息
+let getCustomerInfo = async ()=>{
+  let {data:{info}} = await getCustomerBasicInfo(userStore().userInfo.userId)
+  detail.mobile = info.phone
+}
+watchEffect(()=>{
+  if (isLogin.value === true){
+    getCustomerInfo()
+  }
+})
 </script>
 
 <template>
@@ -26,14 +66,17 @@ function Login() {
       </div>
     </div>
 
-    <div v-else class="head-page" @click="Login">
-      <div class="head-img">
-        <img src="@/assets/default-avatar.png" alt="" srcset="">
+    <div v-else >
+      <div @click="Login" class="head-page">
+        <div class="head-img">
+          <img src="@/assets/default-avatar.png" alt="" srcset="">
+        </div>
+        <div class="info">
+          <div class="mobile">未登录</div>
+          <div class="words">点击登录账号</div>
+        </div>
       </div>
-      <div class="info">
-        <div class="mobile">未登录</div>
-        <div class="words">点击登录账号</div>
-      </div>
+
     </div>
     <div class="my-asset">
       <van-row :gutter="[20, 20]">
@@ -74,7 +117,7 @@ function Login() {
     </div>
     <div class="service">
       <div class="title">我的服务</div>
-      <van-grid clickable :column-num="4" :border="false" :gutter="[10]">
+      <van-grid clickable :column-num="4" :border="false" :gutter="10">
         <van-grid-item to="/">
           <van-icon name="records"></van-icon>
           <span>收货地址</span>
@@ -102,9 +145,15 @@ function Login() {
       </van-grid>
     </div>
     <div class="logout-btn">
-      <van-button type="danger">退出登录</van-button>
+      <van-button color="#ee0a24" @click="showDialog= true">退出登录</van-button>
     </div>
 
+    <van-dialog v-model:show="showDialog" title="温馨提示" show-cancel-button
+                cancel-button-text="取消" confirm-button-text="确认"
+                confirm-button-color="#ee0a24" @confirm="signOut"
+                #default>
+      <p>你确认要退出么</p>
+    </van-dialog>
   </div>
 
 </template>
@@ -253,5 +302,13 @@ function Login() {
 
   }
 }
+::v-deep(.van-dialog) {
+  text-align: center;
+  height: 150px;
 
+  .van-dialog__content {
+    margin: 10px 0;
+    color: #959595
+  }
+}
 </style>

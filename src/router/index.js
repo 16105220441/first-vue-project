@@ -12,11 +12,12 @@ import {createRouter, createWebHistory} from "vue-router";
 import Home from "@/views/layout/home.vue";
 
 const router = createRouter({
+    history: createWebHistory(),
     routes: [
         {
             path: '/login',
             name: 'login',
-            component: Login
+            component: Login,
         },
         {
             path: '/',
@@ -59,7 +60,7 @@ const router = createRouter({
         {
             path: '/proDetail/:id',
             name: 'ProDetail',
-            component: ProDetail
+            component: ProDetail,
         },
         {
             path: '/pay',
@@ -72,7 +73,22 @@ const router = createRouter({
             component: MyOrder
         }
     ],
-    history: createWebHistory()
-})
 
+})
+export let backUrl = '/'
+export function setBckUrl(url){
+    backUrl = url
+}
+router.beforeResolve((to, from) => {
+    if (from.name === 'ProDetail' && to.name === 'login') {
+            backUrl = from.path
+    }
+    if(from.name === 'ProDetail' && to.name === 'cart'){
+        backUrl = from.path
+    }
+    console.log(backUrl)
+    if(to.name === 'ProDetail'){
+        backUrl = '/'
+    }
+})
 export default router

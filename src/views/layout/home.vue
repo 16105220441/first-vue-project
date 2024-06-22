@@ -1,11 +1,15 @@
 <script setup>
-import {ref, reactive} from "vue"
-import GoodsItem from "@/components/GoodsItem.vue";
-import {getHomeData} from "@/api/home.js";
+import {reactive, ref} from "vue"
+import {
+  getCarouselImg,
+  getHomeData,
+  getRecommendedProducts,
+  getTopCategorise
+} from "@/api/home.js";
 import {useRouter} from "vue-router";
+import GoodsItem from "@/components/GoodsItem.vue";
 
 
-const finished = ref(false);
 let bannerList = reactive([])
 let navList = reactive([])
 let proList = reactive([])
@@ -13,38 +17,88 @@ const router = useRouter()
 const getPageData = async () => {
   let {data: {pageData: {items}}} = await getHomeData();
   console.log('items', items)
-  // 使用 Vue 提供的响应式 API 来更新响应式对象的值
-  bannerList.splice(0, bannerList.length, ...items[1].data);
-  // 或者使用循环遍历赋值
-  // bannerList.length = 0;
-  // bannerList.push(...items[1].data);
 
-  // 更新其他响应式对象的值
-  navList.splice(0, navList.length, ...items[3].data);
-  proList.splice(0, proList.length, ...items[6].data);
+  /*proList.splice(0, proList.length, ...items[6].data);*/
   console.log('bannerList', bannerList[0])
 }
 getPageData()
 
-const navigateToSearch = ()=>{
+const getBannerList = async () => {
+  let {data: {carouselImg}} = await getCarouselImg()
+  bannerList.splice(0, bannerList.length, ...carouselImg)
+}
+getBannerList()
+
+const getNavList = async () => {
+  let {data: {topCategorise}} = await getTopCategorise()
+  navList.splice(0, navList.length, ...topCategorise);
+
+}
+getNavList()
+
+const list = ref([]);
+const loading = ref(false);
+const finished = ref(false);
+/*const onLoad = () => {
+  // 异步更新数据
+  // setTimeout 仅做示例，真实场景中一般为 ajax 请求
+  setTimeout(() => {
+    for (let i = 0; i < 10; i++) {
+      list.value.push(list.value.length + 1);
+    }
+
+    // 加载状态结束
+    loading.value = false;
+
+    // 数据全部加载完成
+    if (list.value.length >= 40) {
+      finished.value = true;
+    }
+  }, 1000);
+};*/
+let page = ref(1)
+const getProList = async () => {
+  let {data: {productsData:{list, isLastPage}}} = await
+      getRecommendedProducts(page.value, 3)
+
+  proList.push(...list)
+
+  loading.value = false
+  if (!isLastPage) {
+    page.value++;
+  } else {
+    finished.value = true
+  }
+  console.log(list, isLastPage)
+
+}
+/*getProList()*/
+
+const navigateToSearch = () => {
   router.push('/search')
 }
+
 </script>
 
 <template>
   <div class="page">
-    <van-nav-bar title="智慧商城" fixed></van-nav-bar>
+    <van-nav-bar title="小小商城" fixed></van-nav-bar>
 
-    <van-search  placeholder="请输入搜索关键词" background="#f1f1f2" readonly shape="round" @click="navigateToSearch"/>
+    <van-search placeholder="请输入搜索关键词" background="#f1f1f2" readonly
+                shape="round" @click="navigateToSearch"/>
+
     <main>
+
       <van-swipe class="my-swipe" :autoplay="3000" indicator-color="white">
 
         <van-swipe-item v-for="(item,index) in bannerList" :key="index">
-          <img :src="item.imgUrl" alt="">
+          <img :src="item.imageUrl" alt="">
         </van-swipe-item>
       </van-swipe>
+
       <van-grid :column-num="5">
-        <van-grid-item v-for="(item,index) in navList" :key="index" :icon="item.imgUrl" :text="item.text"/>
+        <van-grid-item v-for="(item,index) in navList" :key="index"
+                       :icon="item.imageUrl" :text="item.text"/>
       </van-grid>
 
       <div class="main">
@@ -53,11 +107,13 @@ const navigateToSearch = ()=>{
       <div class="guess">
         <p class="guess-title">——猜你喜欢——</p>
         <van-list
+            v-model:loading="loading"
             :finished="finished"
             finished-text="没有更多了"
+            @load="getProList" offset="30"
         >
-          <van-cell v-for="(item,index) in proList" :key="index">
-            <GoodsItem :data-item="item" class="goods-item" :class="index==proList.length-1 ? 'end' : '' "></GoodsItem>
+          <van-cell v-for="(item,index) in proList" :key="item">
+            <GoodsItem :data-item="item"/>
           </van-cell>
         </van-list>
       </div>
@@ -68,14 +124,14 @@ const navigateToSearch = ()=>{
 
 <style lang="less" scoped>
 .page {
-  height: 100%;
+  //height: 100%;
 }
 
 .van-nav-bar {
   z-index: 999;
   background-color: #c21401;
 
-  ::v-deep .van-nav-bar__title {
+  ::v-deep(.van-nav-bar__title) {
     color: #ffffff;
   }
 }
@@ -94,9 +150,20 @@ const navigateToSearch = ()=>{
 
 main {
   position: relative;
-  top: 100px
+  top: 100px;
+
+  /*img {
+    width: 100%;
+
+  }*/
 }
 
+/*.main{
+  img{
+    display: block;
+    width: 100%;
+  }
+}*/
 .my-swipe {
   .van-swipe-item {
     height: 185px;
@@ -127,18 +194,19 @@ main {
 
   .van-list {
     background-color: #f6f6f6;
-    height:100vh;
+    height: 100vh;
 
     .van-cell {
       background-color: #f6f6f6;
       padding: 0;
 
       .goods-item {
-        margin-bottom:10px;
+        margin-bottom: 10px;
         background-color: #fff;
       }
-      .goods-item.end{
-        margin-bottom:50px
+
+      .goods-item.end {
+        margin-bottom: 50px
       }
     }
 

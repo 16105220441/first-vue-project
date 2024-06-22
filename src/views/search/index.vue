@@ -4,17 +4,13 @@ import {showToast} from "vant";
 import router from "@/router/index.js";
 import {getHistoryList, setHistoryList} from "@/utils/storage.js";
 
-let value = ref('');
-const onSearch = (val) => showToast(val);
-const onClickButton = () => showToast(value.value);
+;
 
 let history = ref(getHistoryList())
 console.log('history', history)
 
 let searchKey = ref('')
-const getInputText = (inputText)=>{
- searchKey.value = inputText
-}
+
 
 const goSearch = (item) => {
   console.log('items', item)
@@ -42,11 +38,11 @@ const clear = () => {
   <div class="search">
     <van-nav-bar title="商品搜索" left-arrow @click-left="router.go(-1)"></van-nav-bar>
     <van-search
-        v-model="value"
+        v-model="searchKey"
         show-action
         placeholder="请输入搜索关键词"
-        @search=""
-        @blur="getInputText($event.target.value)"
+
+
 
     >
 
@@ -55,7 +51,7 @@ const clear = () => {
       </template>
     </van-search>
 
-    <div class="search-history" v-if="history.length > 0">
+    <div class="search-history" v-if="history?.length > 0">
       <div class="title">
         <van-nav-bar>
           <template #left>

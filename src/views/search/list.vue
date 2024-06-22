@@ -1,12 +1,13 @@
 <script setup>
 import {onBeforeMount, onMounted, ref} from 'vue'
 import {useRoute} from "vue-router";
-import {goodList} from "@/api/product..js";
+import {goodList} from "@/api/product.js";
 import GoodsItem from "@/components/GoodsItem.vue";
 import {setHistoryList} from "@/utils/storage.js";
 import router from "@/router/index.js";
 
 let querySearch = ref('')
+let categoryId = ref('')
 const route = useRoute();
 
 const proList = ref([])
@@ -16,18 +17,18 @@ const resetQuerySearch = (() => {
 
 
 const getGoodsData = async () => {
-  let {data: {list}} = await goodList({
+  let {data: {productsData}} = await goodList({
     goodsName: querySearch.value,
+    categoryId:categoryId.value
     // page: 1
   })
 
-  proList.value = list.data
+  proList.value = productsData.list
 }
 const reGetGoodsData = () => {
-  console.log(`reGetGoodsData触发了`)
-  route.query.search = querySearch.value
-  getGoodsData()
-  setHistoryList(querySearch.value)
+
+  router.push({name:'search'})
+
 
 }
 
@@ -38,6 +39,7 @@ onMounted(() => {
 onBeforeMount(() => {
   // 通过route.query来获取查询参数
   querySearch.value = route.query.search
+  categoryId.value = route.query.categoryId
   // console.log(searchParam); // 这里将输出 "手机"，对应你提供的示例中的查询参数
 });
 </script>
@@ -51,7 +53,9 @@ onBeforeMount(() => {
         @click-left="router.go(-1)"
     />
     <van-search v-model="querySearch" placeholder="请输入搜索关键词" shape="round"
-                @click-left-icon="reGetGoodsData" @search="reGetGoodsData" show-action>
+                @click-left-icon="reGetGoodsData" @focus="reGetGoodsData"
+
+                show-action>
       <template #action>
         <van-icon name="apps-o"/>
       </template>

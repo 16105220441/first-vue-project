@@ -3,6 +3,7 @@ import {defineProps} from 'vue'
 import router from "@/router/index.js";
 
 
+
 const navigateToProDetail = (id)=>{
   console.log('id',id)
   router.push({name:'ProDetail',params:{
@@ -13,27 +14,33 @@ const navigateToProDetail = (id)=>{
 }
 
 defineProps(['dataItem'])
+
 </script>
 
 <template>
-  <van-row justify="end" class="main" gutter="20" @click=" navigateToProDetail(dataItem.goods_id)">
+  <van-row justify="end" class="main" gutter="20" @click="
+  navigateToProDetail(dataItem.productId
+)">
     <van-col span="8" >
-      <van-image :src="dataItem.goods_image"></van-image>
+      <van-image :src="dataItem.productImage
+
+"></van-image>
     </van-col>
     <van-col span="16">
       <p>
         <van-text-ellipsis
             rows="2"
-            :content="dataItem.goods_name"
+            :content="dataItem.name"
 
         />
       </p>
-      <div class="sold">已售{{ dataItem.goods_sales }}件</div>
+      <div class="sold">已售{{ dataItem.productSales}}件</div>
       <van-row>
-        <van-col span="8" class="value new-value">￥{{ dataItem.line_price_max }}
+        <van-col span="8" class="value new-value">￥{{ dataItem.originalPrice}}
         </van-col>
         <van-col span="8" class="value old-value">
-          ￥{{ dataItem.line_price_min }}
+          ￥{{ dataItem.
+            discountPrice}}
         </van-col>
       </van-row>
 

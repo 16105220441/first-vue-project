@@ -1,20 +1,17 @@
 import axios from "axios";
 import {closeToast, showFailToast, showLoadingToast, Toast} from "vant";
 import {userStore} from "@/store/userStore.js"
-const request = axios.create({
-    baseURL:'https://smart-shop.itheima.net/index.php?s=/api',
+const requestUtil = axios.create({
+    baseURL:'/another-api',
     timeout:5000
 })
 
-request.interceptors.request.use(function (config){
-   showLoadingToast(
-        {
-            message:'加载中...',
-            forbidClick:true,
-            loadingType:'spinner',
-            // duration:0
-        }
-    )
+requestUtil.interceptors.request.use(function (config){
+    showLoadingToast({
+        message: '加载中...',
+        forbidClick: true,
+        loadingType: 'spinner',
+    })
 
     const token = userStore().userInfo.token
     if(token){
@@ -25,10 +22,10 @@ request.interceptors.request.use(function (config){
 },function(error){
     return Promise.reject(error)
 })
-request.interceptors.response.use(function(response){
+requestUtil.interceptors.response.use(function(response){
     const res = response.data
-    if(res.status !== 200){
-        showFailToast(res.message)
+    if(res.code !== 200){
+        showFailToast({message:res.message})
         return Promise.reject(res.message)
     }
     else{
@@ -40,4 +37,4 @@ request.interceptors.response.use(function(response){
     return Promise.reject(error)
 })
 
-export default request;
+export default requestUtil;
