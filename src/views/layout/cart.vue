@@ -22,16 +22,16 @@ const logInOrNot = () => {
 const getPageDetail = async () => {
   let {data: {cartList}} = await getCartList(userStore().userInfo.userId)
   console.log(cartList.totalQuantity)
-  cartStore().cartInfo.totalNum = cartList.totalQuantity
-  cartStore().cartInfo.totalPrice = cartList.totalPrice
-  totalProPrice.value = cartList.totalPrice
-  for (const listElement of cartList.shoppingCartDetails) {
+  cartStore().cartInfo.totalNum = cartList[0].totalQuantity
+  cartStore().cartInfo.totalPrice = cartList[0].totalPrice
+  totalProPrice.value = cartList[0].totalPrice
+  for (const listElement of cartList[0].shoppingCartDetails) {
     listElement.isChecked = true
     totalProNum.value += listElement.quantity
     proNum.push({'goods_num': listElement.quantity})
   }
   checkedAll.value = true
-  carList.push(...cartList.shoppingCartDetails)
+  carList.push(...cartList[0].shoppingCartDetails)
 
 }
 
@@ -107,15 +107,28 @@ const deletePro = async () => {
 }
 
 const settlement = () => {
-  console.log('settlement')
-  // console.log(1)
-  cartStore().setCartList(carList)
-  cartStore().setTotalPrice(totalProPrice.value)
-  router.push({
-    name: 'pay', query: {
-      mode: 'cart'
-    }
-  })
+  let shopping_detailId = ''
+
+  for (let i = 0; i < carList.length; i++) {
+    if (carList[i].isChecked)
+
+      shopping_detailId = shopping_detailId.concat(carList[i].detailId + ',')
+  }
+
+  if(shopping_detailId.lastIndexOf(',') === shopping_detailId.length-1){
+    shopping_detailId = shopping_detailId.slice(0,shopping_detailId.length-1)
+
+}
+console.log('settlement')
+// console.log(1)
+cartStore().setCartList(carList[0])
+cartStore().setTotalPrice(totalProPrice.value)
+router.push({
+  name: 'pay',
+  query: {
+    shopping_detailIdList: shopping_detailId
+  }
+})
 }
 
 

@@ -1,0 +1,28 @@
+@font-face {
+    font-family: "van-icon-iconalis"; /* Project id 4595109 */
+    /* Color fonts */
+    src:
+            url('//at.alicdn.com/t/c/font_4595109_aocqaszf6cn.woff2?t=1719062663321') format('woff2'),
+            url('//at.alicdn.com/t/c/font_4595109_aocqaszf6cn.woff?t=1719062663321') format('woff'),
+            url('//at.alicdn.com/t/c/font_4595109_aocqaszf6cn.ttf?t=1719062663321') format('truetype');
+}
+
+.van-icon-iconalis {
+    font-family: "van-icon-iconalis" !important;
+    font-size: 16px;
+    font-style: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-yinhangqiazhifu:before {
+    content: "\e644";
+}
+
+.icon-weixinzhifu1:before {
+    content: "\e606";
+}
+
+.icon-svg-plat-douyin000:before {
+    content: "\e600";
+}

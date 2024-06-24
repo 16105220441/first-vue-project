@@ -10,6 +10,8 @@ import Cart from '@/views/layout/cart.vue'
 import User from '@/views/layout/user.vue'
 import {createRouter, createWebHistory} from "vue-router";
 import Home from "@/views/layout/home.vue";
+import AddressEdit from "@/views/shoppingAddress/addressEdit.vue"
+import AddressList from "@/views/shoppingAddress/addressList.vue";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -21,7 +23,6 @@ const router = createRouter({
         },
         {
             path: '/',
-            name: 'home',
             component: Layout,
             redirect: '/home',
             children: [
@@ -71,23 +72,35 @@ const router = createRouter({
             path: '/myOrder',
             name: 'myOrder',
             component: MyOrder
+        },
+        {
+            path: '/shoppingAddress/edit',
+            name: 'addressEdit',
+            component: AddressEdit
+        },
+        {
+            path: '/shoppingAddress/list',
+            name: 'addressList',
+            component: AddressList
         }
     ],
 
 })
 export let backUrl = '/'
-export function setBckUrl(url){
+
+export function setBckUrl(url) {
     backUrl = url
 }
+
 router.beforeResolve((to, from) => {
     if (from.name === 'ProDetail' && to.name === 'login') {
-            backUrl = from.path
+        backUrl = from.path
     }
-    if(from.name === 'ProDetail' && to.name === 'cart'){
+    if (from.name === 'ProDetail' && to.name === 'cart') {
         backUrl = from.path
     }
     console.log(backUrl)
-    if(to.name === 'ProDetail'){
+    if (to.name === 'ProDetail') {
         backUrl = '/'
     }
 })

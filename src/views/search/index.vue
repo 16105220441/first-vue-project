@@ -4,7 +4,6 @@ import {showToast} from "vant";
 import router from "@/router/index.js";
 import {getHistoryList, setHistoryList} from "@/utils/storage.js";
 
-;
 
 let history = ref(getHistoryList())
 console.log('history', history)

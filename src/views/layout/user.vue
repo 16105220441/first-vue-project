@@ -4,6 +4,7 @@ import {userStore} from "@/store/userStore.js";
 import router from "@/router/index.js";
 import {cartStore} from "@/store/cartStore.js";
 import {getCustomerBasicInfo} from "@/api/user.js";
+import {showConfirmDialog} from "vant";
 
 let isLogin = ref(false)
 let detail = reactive({
@@ -49,6 +50,23 @@ watchEffect(()=>{
     getCustomerInfo()
   }
 })
+
+const shoppingAddress = ()=>{
+  if(userStore().userInfo.userId){
+    router.push({name:"addressList"})
+  }
+  else{
+    showConfirmDialog({
+      title: '暂未登录，请先登录',
+    })
+        .then(() => {
+          router.push({name:"login"})
+        })
+        .catch(() => {
+          // on cancel
+        });
+  }
+}
 </script>
 
 <template>
@@ -118,7 +136,7 @@ watchEffect(()=>{
     <div class="service">
       <div class="title">我的服务</div>
       <van-grid clickable :column-num="4" :border="false" :gutter="10">
-        <van-grid-item to="/">
+        <van-grid-item @click="shoppingAddress">
           <van-icon name="records"></van-icon>
           <span>收货地址</span>
         </van-grid-item>

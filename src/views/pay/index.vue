@@ -1,65 +1,79 @@
 <script setup>
 
 import router from "@/router/index.js";
-import {ref, onMounted,computed} from "vue";
+import {computed, ref} from "vue";
 import {showToast} from "vant";
-import {getAddressList} from "@/api/address.js";
-import {useRoute, useRouter} from "vue-router";
-import {checkOrder} from "@/api/order.js";
-import {cartStore} from "@/store/cartStore.js";
-
+import {get_defaultAddress} from "@/api/address.js";
+import {useRoute} from "vue-router";
+import '@/assets/icon.css'
+import {getCartList} from "@/api/cart.js";
+import {userStore} from "@/store/userStore.js";
 
 let message = ref()
 
 
 let addressList = ref([])
-let defaultAddress = computed(()=>{
-  return addressList[0]
-})
-let longAddress = computed(()=>{
+
+let longAddress = computed(() => {
   const region = defaultAddress.value.region
-  return region.province+region.city+region.region + defaultAddress.value.detail
+  return region.province + region.city + region.region + defaultAddress.value.detail
 })
-const getAListOfAddresses = async ()=>{
-  let {data:{list}} = await getAddressList()
+/*const getAListOfAddresses = async () => {
+  let {data: {list}} = await getAddressList()
   addressList.value = list
   // console.log(addressList.value)
 }
-getAListOfAddresses()
+getAListOfAddresses()*/
 
 let mode = ref()
-let getMode = ()=>{
-  mode.value = useRoute().query.mode
+let getMode = () => {
+  mode.value = useRoute().query.shopping_detailIdList
 
 }
 getMode()
 
-let cartIds = ref('')
-let getCartId = ()=>{
-   let cartList =  cartStore().getCartList()
- for(let i = 0; i < cartList.length; i++){
-   cartIds.value += cartList[i].id
-   if(i < cartList.length - 1){
-     cartIds.value += ','
-   }
- }
-}
-getCartId()
-
 let Order = ref({})
-let Personal = ref({})
 
-let getOrderList = async ()=>{
-  if(mode.value === 'cart'){
-    let {data:{order,personal}} = await
-        checkOrder(mode.value,{cartIds:cartIds.value})
-    Order.value = order
-    Personal.value = personal
-  }
+
+let getOrderList = async () => {
+
+  let {data: {cartList}} = await
+      getCartList(userStore().userInfo.userId, mode.value)
+  Order.value = cartList
 }
 getOrderList()
 
+let totalPrice = computed(() => {
+  let total = 0
+
+  for (let i = 0; i < Order.value.length; i++) {
+    total =
+        Number((total + Order.value[i].shoppingCartDetails[0].itemTotalPrice).toFixed(2))
+  }
+  return total
+})
+
 const onSubmit = () => showToast('点击按钮');
+const value = ref(0)
+const menuRef = ref(null);
+const itemRef = ref();
+
+const options = [
+  {text: '微信支付', value: 0, icon: 'iconalis icon-weixinzhifu1',},
+  {text: '银行卡支付', value: 1, icon: 'iconalis icon-yinhangqiazhifu'},
+  {text: '抖音支付', value: 2, icon: 'iconalis icon-svg-plat-douyin000'},
+];
+
+let default_address = ref()
+const getDefaultAddress = async () => {
+  let {data: {defaultAddress}} = await
+      get_defaultAddress("true", userStore().userInfo.userId)
+  if (defaultAddress !== null) {
+    default_address.value = defaultAddress
+  }
+
+}
+getDefaultAddress()
 </script>
 
 <template>
@@ -67,22 +81,31 @@ const onSubmit = () => showToast('点击按钮');
     <van-nav-bar title="订单结算台" left-arrow
                  @click-left="router.go(-1)" border fixed
                  placeholder></van-nav-bar>
-    <van-row class="address">
+    <van-row class="address" @click="()=>{
+        router.push({name:'addressList'})
+    }">
       <div class="left-icon">
         <van-icon name="logistics"></van-icon>
       </div>
-      <div class="info" v-if="defaultAddress">
+      <div class="info" v-if="default_address"
+      >
         <div class="info-content">
-          <span class="name">{{defaultAddress.name}}</span>
-          <span class="mobile">{{defaultAddress.phone}}</span>
+          <span class="name">{{ default_address.name }}</span>
+
+
+          <span class="mobile">
+          {{ default_address.tel }}</span>
+
         </div>
-        <div class="info-address">
-         {{longAddress}}
-        </div>
+        <van-text-ellipsis rows="2" class="info-address"
+                           :content="default_address.province+default_address.city+default_address.county+default_address.addressDetail">
+
+        </van-text-ellipsis>
       </div>
 
-      <div class="info" v-else style="margin-left: -180px">
+      <div class="info" v-else>
         <span>请填写配送地址</span>
+
       </div>
 
       <div class="right-icon">
@@ -90,52 +113,27 @@ const onSubmit = () => showToast('点击按钮');
       </div>
     </van-row>
 
-    <!--
-        <van-skeleton class="pay-list" :loading="loading"
-                      style="padding: 10px 20px;border-bottom: 1px solid #d7d8da">
-          <template #template>
-            <div :style="{ display: 'flex', width: '100%'
-            ,alignItems:'center'}">
-              <van-skeleton-image>
-                <van-image src=""></van-image>
-              </van-skeleton-image>
-              <div :style="{ flex: 1, marginLeft: '16px',}">
-                <van-skeleton-paragraph>
-                </van-skeleton-paragraph>
-                <van-skeleton-paragraph>
-                  <p class="info">
-                    <span class="count">*3</span>
-                    <span class="price">￥9.99</span>
-                  </p>
-                </van-skeleton-paragraph>
-                <van-skeleton-paragraph class="flow-num-box">
-                  <van-highlight
-                      keywords="￥1219.00"
-                      source-string="共 12 件商品，合计：￥1219.00"
-                      highlight-class="custom-class"
-                  />
-                </van-skeleton-paragraph>
-              </div>
-            </div>
-          </template>
-        </van-skeleton>
-    -->
     <div class="pay-list">
-      <van-row  gutter="20" align="center" v-if="Order.goodsList" v-for="item
-       in Order.goodsList" :key="item.goods_id">
+      <van-row gutter="20" align="center" v-if="Order"
+               v-for="(item,index)
+       in Order" :key="index">
         <van-col span="8">
-          <van-image :src="item.goods_image" width="100%"></van-image>
+          <van-image
+              :src="item.shoppingCartDetails[0].products.productImage"
+              width="100%"></van-image>
         </van-col>
 
         <van-col span="16" class="right">
           <van-text-ellipsis rows="2"
-                             :content="item.goods_name"></van-text-ellipsis>
+                             :content="item.shoppingCartDetails[0].products.name"></van-text-ellipsis>
           <van-row class="info" justify="space-between">
             <div>
-              <span>*{{item.total_num}}</span>
+              <span>*{{ item.shoppingCartDetails[0].quantity }}</span>
             </div>
             <div>
-              <span class="custom-class">¥{{item.total_pay_price}}</span>
+              <span class="custom-class">¥{{
+                  item.shoppingCartDetails[0].itemTotalPrice
+                }}</span>
             </div>
           </van-row>
         </van-col>
@@ -145,7 +143,7 @@ const onSubmit = () => showToast('点击按钮');
     <div class="pay-info">
       <van-row class="pay-detail">
         <div>订单总金额：</div>
-        <div class="custom-class">￥{{Order.orderTotalPrice}}</div>
+        <div class="custom-class">￥{{ totalPrice }}</div>
       </van-row>
       <van-row class="pay-cell">
         <div>优惠券：</div>
@@ -158,14 +156,17 @@ const onSubmit = () => showToast('点击按钮');
       </van-row>
     </div>
     <div class="pay-cell">
-      <van-row>支付方式</van-row>
-      <van-row class="pay-cell-item" justify="space-between" >
-        <div>
-          <van-icon name="balance-o"/>
-          <span>余额支付（可用 ¥{{Personal.balance}} 元）</span>
-        </div>
-        <div>
-          <van-icon name="passed" color="#fe5731"/>
+      <van-row style="color: #c21401">支付方式:</van-row>
+      <van-row class="pay-cell-item" justify="space-between">
+        <div style="width: 100%">
+          <van-dropdown-menu ref="menuRef" class="van-icon-iconalis" direction="up">
+            <van-dropdown-item ref="itemRef" v-model="value" :options="options"
+                               :title-class="options[value].icon"
+
+
+            >
+            </van-dropdown-item>
+          </van-dropdown-menu>
         </div>
       </van-row>
     </div>
@@ -188,7 +189,7 @@ const onSubmit = () => showToast('点击按钮');
       <template #default>
         <div>
           <span>实付金额</span>
-          <span class="custom-class">：￥{{Order.orderTotalPrice}}</span>
+          <span class="custom-class">：￥{{ totalPrice }}</span>
         </div>
       </template>
       <template #button>
@@ -212,41 +213,51 @@ const onSubmit = () => showToast('点击按钮');
 .address {
   justify-content: space-between;
   border-bottom: 1px solid #d7d8da;
+  align-items: center;
   padding: 10px 5px 10px 20px;
 
   .info {
-    margin-left: -35px;
+    width: 250px;
   }
 }
-.pay-list{
+
+.pay-list {
   padding: 10px 5px 10px 20px;
   border-bottom: 1px solid #d7d8da;
 
 }
-.pay-info{
+
+.pay-info {
   border-bottom: 1px solid #d7d8da;
-  .pay-detail{
+
+  .pay-detail {
     padding: 10px 5px 10px 20px;
     justify-content: space-between;
   }
-  .pay-cell{
+
+  .pay-cell {
     padding: 10px 5px 10px 20px;
     justify-content: space-between;
   }
 }
-.pay-cell{
+
+.pay-cell {
   padding-left: 20px;
   padding-right: 5px;
-  .van-row:not(.pay-cell-item){
+
+  .van-row:not(.pay-cell-item) {
     padding: 10px 0;
   }
 }
-.van-cell-group{
+
+.van-cell-group {
   margin-right: 0;
-  .van-field{
+
+  .van-field {
     padding-left: 0;
   }
 }
+
 .custom-class {
   color: #fe5731;
 }
@@ -257,6 +268,28 @@ const onSubmit = () => showToast('点击按钮');
   ::v-deep(.van-submit-bar__bar) {
     justify-content: space-between;
   }
+}
+
+.van-dropdown-menu {
+  border-bottom: 2px solid gray;
+
+  ::v-deep(.van-dropdown-menu__bar) {
+    box-shadow: none;
+
+    .van-haptics-feedback {
+      width: 100%;
+
+      .van-dropdown-menu__title {
+        padding-left: 0;
+        display: flex;
+        width: 100%;
+        flex-direction: row-reverse;
+        justify-content: space-between;
+
+      }
+    }
+  }
+
 }
 
 </style>
