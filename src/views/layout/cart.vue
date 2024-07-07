@@ -20,18 +20,20 @@ const logInOrNot = () => {
 }
 
 const getPageDetail = async () => {
-  let {data: {cartList}} = await getCartList(userStore().userInfo.userId)
-  console.log(cartList.totalQuantity)
-  cartStore().cartInfo.totalNum = cartList[0].totalQuantity
-  cartStore().cartInfo.totalPrice = cartList[0].totalPrice
-  totalProPrice.value = cartList[0].totalPrice
-  for (const listElement of cartList[0].shoppingCartDetails) {
-    listElement.isChecked = true
-    totalProNum.value += listElement.quantity
-    proNum.push({'goods_num': listElement.quantity})
+  if(userStore().userInfo.userId){
+    let {data: {cartList}} = await getCartList(userStore().userInfo.userId)
+    console.log(cartList.totalQuantity)
+    cartStore().cartInfo.totalNum = cartList[0].totalQuantity
+    cartStore().cartInfo.totalPrice = cartList[0].totalPrice
+    totalProPrice.value = cartList[0].totalPrice
+    for (const listElement of cartList[0].shoppingCartDetails) {
+      listElement.isChecked = true
+      totalProNum.value += listElement.quantity
+      proNum.push({'goods_num': listElement.quantity})
+    }
+    checkedAll.value = true
+    carList.push(...cartList[0].shoppingCartDetails)
   }
-  checkedAll.value = true
-  carList.push(...cartList[0].shoppingCartDetails)
 
 }
 

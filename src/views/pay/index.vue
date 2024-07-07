@@ -2,12 +2,13 @@
 
 import router from "@/router/index.js";
 import {computed, ref} from "vue";
-import {showToast} from "vant";
+import {showConfirmDialog, showDialog, showToast} from "vant";
 import {get_defaultAddress} from "@/api/address.js";
 import {useRoute} from "vue-router";
 import '@/assets/icon.css'
 import {getCartList} from "@/api/cart.js";
 import {userStore} from "@/store/userStore.js";
+import {add_oder} from "@/api/order.js";
 
 let message = ref()
 
@@ -53,9 +54,45 @@ let totalPrice = computed(() => {
   return total
 })
 
-const onSubmit = () => showToast('点击按钮');
+const onSubmit = async () => {
+  if(!default_address.value){
+    showConfirmDialog({
+      title: '未选择收货地址，请先选择收货地址',
+
+    })
+        .then(() => {
+          // on confirm
+          router.push({name:"addressList"})
+        })
+        .catch(() => {
+          // on cancel
+        });
+  }
+  else{
+    /*后续填写跳转到第三方支付的代码*/
+    let obj = []
+    for(let i = 0; i < Order.value.length; i++){
+      obj.push({
+        customerId: userStore().userInfo.userId,
+        productId: Order.value[i].shoppingCartDetails[0].productId,
+        addressDetailId:default_address.value.addressDetailId,
+        shoppingCartId: Order.value[i].id,
+        shoppingCartDetailId: Order.value[i].shoppingCartDetails[0].detailId,
+        itemTotalPrice:Order.value[i].shoppingCartDetails[0].itemTotalPrice,
+        num:Order.value[i].shoppingCartDetails[0].quantity,
+        paymentMethod:menuRef.value
+      })
+    }
+    await add_oder(obj)
+
+    await showDialog({title: '支付成功'}).then(
+        router.push({name:'cart'})
+    );
+
+  }
+}
 const value = ref(0)
-const menuRef = ref(null);
+const menuRef = ref('wechat_pay');
 const itemRef = ref();
 
 const options = [
@@ -74,6 +111,20 @@ const getDefaultAddress = async () => {
 
 }
 getDefaultAddress()
+
+const onchange = (val)=>{
+  if(val === 0){
+    menuRef.value = 'wechat_pay'
+  }
+  else{
+    if(val === 1){
+      menuRef.value = 'bank_card_pay'
+    }
+    if(val === 2){
+      menuRef.value = 'douyin_pay'
+    }
+  }
+}
 </script>
 
 <template>
@@ -151,7 +202,7 @@ getDefaultAddress()
       </van-row>
       <van-row class="pay-cell">
         <div>配送费用：</div>
-        <div v-if="!defaultAddress">请先选择配送地址</div>
+        <div v-if="!default_address">请先选择配送地址</div>
         <div v-else class="custom-class">+￥0.00</div>
       </van-row>
     </div>
@@ -159,9 +210,10 @@ getDefaultAddress()
       <van-row style="color: #c21401">支付方式:</van-row>
       <van-row class="pay-cell-item" justify="space-between">
         <div style="width: 100%">
-          <van-dropdown-menu ref="menuRef" class="van-icon-iconalis" direction="up">
+          <van-dropdown-menu  class="van-icon-iconalis"
+                             direction="up">
             <van-dropdown-item ref="itemRef" v-model="value" :options="options"
-                               :title-class="options[value].icon"
+                               :title-class="options[value].icon" @change="onchange"
 
 
             >
@@ -204,6 +256,9 @@ getDefaultAddress()
 </template>
 
 <style lang="less" scoped>
+.pay{
+  margin-bottom: 50px;
+}
 ::v-deep(.van-nav-bar) {
   .van-icon {
     color: #3c3c3c;

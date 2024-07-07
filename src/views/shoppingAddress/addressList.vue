@@ -22,9 +22,9 @@ const AddressList = async () => {
           tel: shoppAddressList[0].shoppingAddressDetails[i].tel,
           address: shoppAddressList[0].shoppingAddressDetails[i].province !==
           shoppAddressList[0].shoppingAddressDetails[i].city ?
-              shoppAddressList[0].shoppingAddressDetails[i].province + shoppAddressList[0].shoppingAddressDetails[i].city + shoppAddressList[0].shoppingAddressDetails[i].country + shoppAddressList[0].shoppingAddressDetails[i].addressDetail :
+              shoppAddressList[0].shoppingAddressDetails[i].province + shoppAddressList[0].shoppingAddressDetails[i].city + shoppAddressList[0].shoppingAddressDetails[i].county + shoppAddressList[0].shoppingAddressDetails[i].addressDetail :
               shoppAddressList[0].shoppingAddressDetails[i].city +
-              shoppAddressList[0].shoppingAddressDetails[i].country  + shoppAddressList[0].shoppingAddressDetails[i].addressDetail,
+              shoppAddressList[0].shoppingAddressDetails[i].county  + shoppAddressList[0].shoppingAddressDetails[i].addressDetail,
           isDefault:shoppAddressList[0].shoppingAddressDetails[i].isDefault
               === 'true' ?
               shoppAddressList[0].shoppingAddressDetails[i].isDefault : null

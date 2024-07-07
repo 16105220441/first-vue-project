@@ -12,6 +12,8 @@ import {createRouter, createWebHistory} from "vue-router";
 import Home from "@/views/layout/home.vue";
 import AddressEdit from "@/views/shoppingAddress/addressEdit.vue"
 import AddressList from "@/views/shoppingAddress/addressList.vue";
+import OrderList from "@/order/OrderList.vue";
+import {userStore} from "@/store/userStore.js";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -39,7 +41,13 @@ const router = createRouter({
                 {
                     path: 'cart',
                     component: Cart,
-                    name: 'cart'
+                    name: 'cart',
+                    /*beforeEnter:(to,from)=>{
+                        if( !userStore().userInfo.token){
+                            return false
+                        }
+
+                    }*/
                 },
                 {
                     path: 'user',
@@ -76,12 +84,38 @@ const router = createRouter({
         {
             path: '/shoppingAddress/edit',
             name: 'addressEdit',
-            component: AddressEdit
+            component: AddressEdit,
+            beforeEnter:(to,from)=>{
+                if( !userStore().userInfo.token){
+                    router.push({name:'login'})
+                    return false
+                }
+
+            }
         },
         {
             path: '/shoppingAddress/list',
             name: 'addressList',
-            component: AddressList
+            component: AddressList,
+            beforeEnter:(to,from)=>{
+                if( !userStore().userInfo.token){
+                    router.push({name:'login'})
+                    return false
+                }
+
+            }
+        },
+        {
+            path:'/order/list',
+            name:'orderList',
+            component:OrderList,
+            beforeEnter:(to,from)=>{
+                if( !userStore().userInfo.token){
+                    router.push({name:'login'})
+                    return false
+                }
+
+            }
         }
     ],
 

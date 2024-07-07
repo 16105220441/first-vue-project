@@ -15,8 +15,7 @@ requestUtil.interceptors.request.use(function (config){
 
     const token = userStore().userInfo.token
     if(token){
-        config.headers["Access-Token"] = token
-        config.headers['platform'] = 'H5'
+        config.headers["token"] = token
     }
     return config
 },function(error){

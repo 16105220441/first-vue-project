@@ -8,7 +8,7 @@ import {VantResolver} from '@vant/auto-import-resolver';
 import VueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig({
-
+    base:'./',
     plugins: [
         vue(),
         AutoImport({
@@ -28,7 +28,7 @@ export default defineConfig({
 
         proxy: {
             '/another-api': {
-                target: 'http://localhost:8080',
+                target: 'http://8.134.217.162:8080',
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/another-api/, '')
             }

@@ -2,7 +2,7 @@
 import {reactive, ref} from "vue"
 import {
   getCarouselImg,
-  getHomeData,
+
   getRecommendedProducts,
   getTopCategorise
 } from "@/api/home.js";
@@ -14,14 +14,6 @@ let bannerList = reactive([])
 let navList = reactive([])
 let proList = reactive([])
 const router = useRouter()
-const getPageData = async () => {
-  let {data: {pageData: {items}}} = await getHomeData();
-  console.log('items', items)
-
-  /*proList.splice(0, proList.length, ...items[6].data);*/
-  console.log('bannerList', bannerList[0])
-}
-getPageData()
 
 const getBannerList = async () => {
   let {data: {carouselImg}} = await getCarouselImg()

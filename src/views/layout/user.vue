@@ -1,5 +1,5 @@
 <script setup>
-import {reactive, ref,computed,watchEffect,toRefs} from 'vue'
+import {reactive, ref, watchEffect} from 'vue'
 import {userStore} from "@/store/userStore.js";
 import router from "@/router/index.js";
 import {cartStore} from "@/store/cartStore.js";
@@ -8,63 +8,78 @@ import {showConfirmDialog} from "vant";
 
 let isLogin = ref(false)
 let detail = reactive({
-  mobile: ''
+  mobile: '',
+  pickName:''
 })
 
 function Login() {
-  router.push({name:'login'})
+  router.push({name: 'login'})
 }
 
 let showDialog = ref(false)
 
-const signOut = ()=>{
-  for(let key in userStore().userInfo){
-    console.log('key',key,':',userStore().userInfo[key])
+const signOut = () => {
+  for (let key in userStore().userInfo) {
+    console.log('key', key, ':', userStore().userInfo[key])
     userStore().userInfo[key] = ''
   }
 
-  for(let key in cartStore().cartInfo){
-    console.log(typeof(cartStore().cartInfo[key]))
+  for (let key in cartStore().cartInfo) {
+    console.log(typeof (cartStore().cartInfo[key]))
 
-      if(typeof(cartStore().cartInfo[key]) === "object"){
-        cartStore().cartInfo[key] = {}
-      }else if(typeof(cartStore().cartInfo[key]) === "number"){
-        cartStore().cartInfo[key] = 0
-      }
+    if (typeof (cartStore().cartInfo[key]) === "object") {
+      cartStore().cartInfo[key] = {}
+    } else if (typeof (cartStore().cartInfo[key]) === "number") {
+      cartStore().cartInfo[key] = 0
+    }
 
   }
-   console.log(cartStore().cartInfo)
+  console.log(cartStore().cartInfo)
 }
 
 //计算是否登录
-watchEffect(()=>{
+watchEffect(() => {
   isLogin.value = !!userStore().userInfo.token
 })
 //获取用户信息
-let getCustomerInfo = async ()=>{
-  let {data:{info}} = await getCustomerBasicInfo(userStore().userInfo.userId)
+let getCustomerInfo = async () => {
+  let {data: {info}} = await getCustomerBasicInfo(userStore().userInfo.userId)
   detail.mobile = info.phone
+  detail.pickName = info.pickName
 }
-watchEffect(()=>{
-  if (isLogin.value === true){
+watchEffect(() => {
+  if (isLogin.value === true) {
     getCustomerInfo()
   }
 })
 
-const shoppingAddress = ()=>{
-  if(userStore().userInfo.userId){
-    router.push({name:"addressList"})
+const dialog = () => {
+
+  showConfirmDialog({
+    title: '暂未登录，请先登录',
+  })
+      .then(() => {
+        router.push({name: "login"})
+      })
+      .catch(() => {
+        // on cancel
+      });
+}
+
+const shoppingAddress = () => {
+  if (userStore().userInfo.userId) {
+    router.push({name: "addressList"})
+  } else {
+    dialog()
   }
-  else{
-    showConfirmDialog({
-      title: '暂未登录，请先登录',
-    })
-        .then(() => {
-          router.push({name:"login"})
-        })
-        .catch(() => {
-          // on cancel
-        });
+
+}
+
+const checkOrder = () => {
+  if (userStore().userInfo.userId) {
+    router.push({name: "orderList"})
+  } else {
+    dialog()
   }
 }
 </script>
@@ -76,7 +91,11 @@ const shoppingAddress = ()=>{
         <img src="@/assets/default-avatar.png" alt=""/>
       </div>
       <div class="info">
-        <div class="mobile">{{ detail.mobile }}</div>
+        <div class="mobile">{{
+            detail.pickName ? detail.pickName : detail
+                .phone
+          }}
+        </div>
         <div class="vip">
           <van-icon name="diamond-o"></van-icon>
           普通会员
@@ -84,7 +103,7 @@ const shoppingAddress = ()=>{
       </div>
     </div>
 
-    <div v-else >
+    <div v-else>
       <div @click="Login" class="head-page">
         <div class="head-img">
           <img src="@/assets/default-avatar.png" alt="" srcset="">
@@ -115,7 +134,7 @@ const shoppingAddress = ()=>{
     </div>
     <div class="order-navbar">
       <van-row getter="[20,20]">
-        <van-col span="6">
+        <van-col span="6" @click="checkOrder">
           <van-icon name="balance-list-o"></van-icon>
           <span>全部订单</span>
         </van-col>
@@ -163,7 +182,13 @@ const shoppingAddress = ()=>{
       </van-grid>
     </div>
     <div class="logout-btn">
-      <van-button color="#ee0a24" @click="showDialog= true">退出登录</van-button>
+      <van-button color="#ee0a24" @click=" ()=>{
+        if(userStore().userInfo.userId){
+            showDialog= true
+        }
+      }
+    ">退出登录
+      </van-button>
     </div>
 
     <van-dialog v-model:show="showDialog" title="温馨提示" show-cancel-button
@@ -282,44 +307,51 @@ const shoppingAddress = ()=>{
   }
 }
 
-.service{
-  font-size:14px;
-  background-color:#fff;
-  border-radius:5px;
-  margin:10px;
-  padding-bottom:10px;
-  .title{
-    height:50px;
-    line-height:50px;
-    padding:0 15px;
-    font-size:16px;
+.service {
+  font-size: 14px;
+  background-color: #fff;
+  border-radius: 5px;
+  margin: 10px;
+  padding-bottom: 10px;
+
+  .title {
+    height: 50px;
+    line-height: 50px;
+    padding: 0 15px;
+    font-size: 16px;
   }
-  .van-grid{
+
+  .van-grid {
     justify-content: flex-start;
-    font-size:14px;
-    background-color:#fff;
+    font-size: 14px;
+    background-color: #fff;
     border-radius: 5px;
-    .van-grid-item{
-      height:55px;
-      .van-icon{
-        font-size:24px;
-        margin-bottom:5px;
-        color:#ff3800
+
+    .van-grid-item {
+      height: 55px;
+
+      .van-icon {
+        font-size: 24px;
+        margin-bottom: 5px;
+        color: #ff3800
       }
     }
   }
 }
-.logout-btn{
-  margin-top:20px;
-  width:100%;
-  .van-button{
-    display:block;
-    width:75vw;
-    margin:auto;
-    border-radius:10px;
+
+.logout-btn {
+  margin-top: 20px;
+  width: 100%;
+
+  .van-button {
+    display: block;
+    width: 75vw;
+    margin: auto;
+    border-radius: 10px;
 
   }
 }
+
 ::v-deep(.van-dialog) {
   text-align: center;
   height: 150px;

@@ -1,13 +1,23 @@
-import request from '@/utils/request.js'
+import requestUtil from "@/utils/requestUtil.js";
 
-export const checkOrder = (mode,obj)=>{
-    return request.get('checkout/order',{
-        params:{
-            mode,
-            delivery:0,
-            couponId:0,
-            isUsePoints:0,
-            ...obj
+export const add_oder = (orderDetails) => {
+    return requestUtil.post('/orderDetail/add', orderDetails)
+}
+
+export const delete_oder = (orderDetailId) => {
+    return requestUtil.delete('/orderDetail/delete', {
+        params: {
+            orderDetailId
+        }
+    })
+}
+
+export const get_orderList = (customerId, pageNum, pageSize) => {
+    return requestUtil("/orderDetail/get/list", {
+        params: {
+            customerId,
+            pageNum,
+            pageSize
         }
     })
 }

@@ -161,12 +161,16 @@ onUnmounted(() => {
         </van-button>
       </template>
     </van-field>
-  </van-cell-group>
-  <van-button type="primary" size="large"
-              style="border-radius: 10vw;background-color:#f3a72b;
-              border-color: #f3a72b; margin-top:30px" @click="login">
-    登录
-  </van-button>
+  </van-cell-group >
+  <van-row style="justify-content: space-around">
+    <van-button type="primary" size="large"
+                style="border-radius: 10vw;background-color:#f3a72b;
+              border-color: #f3a72b; margin-top:30px;width: 80%"
+                @click="login">
+      登录
+    </van-button>
+  </van-row>
+
 </template>
 
 <style scoped>
