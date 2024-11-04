@@ -13,8 +13,9 @@ const navigateToProDetail = (id)=>{
 
 }
 
-defineProps(['dataItem'])
+const a = defineProps(['dataItem'])
 
+console.log(a.dataItem)
 </script>
 
 <template>

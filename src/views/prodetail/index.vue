@@ -19,8 +19,8 @@ const getGoodId = () => {
 
 }
 getGoodId()
-let detailRef = ref({})
 
+let detailRef = ref({})
 const getDetail = async () => {
   const {data: {productData}} = await getProDetail(goodId.value)
   console.log(productData)

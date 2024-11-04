@@ -15,6 +15,7 @@ let navList = reactive([])
 let proList = reactive([])
 const router = useRouter()
 
+
 const getBannerList = async () => {
   let {data: {carouselImg}} = await getCarouselImg()
   bannerList.splice(0, bannerList.length, ...carouselImg)

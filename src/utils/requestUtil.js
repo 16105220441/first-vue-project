@@ -22,6 +22,7 @@ requestUtil.interceptors.request.use(function (config){
     return Promise.reject(error)
 })
 requestUtil.interceptors.response.use(function(response){
+    console.log('response:',response)
     const res = response.data
     if(res.code !== 200){
         showFailToast({message:res.message})

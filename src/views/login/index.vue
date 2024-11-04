@@ -27,10 +27,10 @@ let msgCodeId = ref('')//短信验证码的唯一标识
 let msgCode = ref('')// 短信验证码
 let timer = null
 
-let cartTotal = ref(0)
+
 const getPicCodeInfo = async () => {
   const {data: {baseImageCode, uuid}} = await getPicCode()
-  console.log(baseImageCode,uuid)
+  console.log('uuid',uuid)
   picUrl.value = baseImageCode
   uid.value = uuid
 }
